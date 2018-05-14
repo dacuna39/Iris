@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, ScrollView, Image, Button, Alert } from 'react-native';
+import { StyleSheet, Text, TextInput, View, ScrollView, Image, Button, FlatList } from 'react-native';
 
 export default class SearchView extends React.Component {
 
@@ -27,7 +27,7 @@ export default class SearchView extends React.Component {
     // full docs at https://pixabay.com/api/docs/
     
     createQueryString = () => { //adds query(q) and any other desired parameters into the url   
-        var query = this.queryString + "&q=";
+        var query = this.queryString + "&per_page=100&q=";
     
         //gets all search terms into the query string
         var searchTerms = this.state.searchText.split(" ");
@@ -63,31 +63,21 @@ export default class SearchView extends React.Component {
         })
         .then(results => { //handles results
             if (results != null && results.totalHits > 0){ //totalHits is # of accessible image urls from pixabay
-                
-                for (var i=0; i < results.totalHits && i < 100; i++){ //max 30 results
-                    searchObjects.push(results.hits[i]);
+                for (var i=0; i < results.hits.length; i++){ //length of hits is determined by per_page param in request
+                    if (results.hits[i] != undefined){
+                        searchObjects.push(results.hits[i]);
+                    }
                 }
-                //console.log("searchObjects", searchObjects);
 
-                this.setState({ resultObjects: searchObjects });
+                this.setState({ resultObjects: searchObjects }, () => console.log("resultObjects ", this.state.resultObjects.length));
             }
             else {
                 alert("No results found");
             }
         })
-        .catch((error) => alert("An error occurred, please try again later"));
+        .catch((error) => alert(error));
         
     }//end searchImage
-
-    renderImages = () => {
-        return this.state.resultObjects.map((img) => {
-            if (img != undefined){
-                return (
-                    <Image key={img.id} source={{uri: img.previewURL}} />
-                );
-            } 
-        });
-    }
 
     render() {
 
@@ -100,12 +90,15 @@ export default class SearchView extends React.Component {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Search Here"
+                        value={this.state.searchText}
                         onChangeText={(text) => this.setState({searchText: text})}
                     />
         
                     <Button onPress={this.searchImage} title="Search" />
                     <Text> </Text>
                     <Text> Powered by the Pixabay API </Text>
+                    <Image source={require('Iris/components/Images/pixabayLogo.png')} 
+                        style={{width: 160, height: 31}} />
                 </View>
             );
         }
@@ -113,12 +106,21 @@ export default class SearchView extends React.Component {
         else { //found results
             return (
                 <View style={styles.bodyElement}>
-                    <Text> Found {this.state.resultObjects.length} results for {this.state.searchText} </Text>
-                    <ScrollView>
-                        {this.renderImages()}
-                    </ScrollView>
+                    <Text style={styles.h2}> Results for {this.state.searchText} </Text>
+
+                    <FlatList
+                        contentContainerStyle={styles.imageContainer}
+                        data={this.state.resultObjects}
+                        renderItem={({item}) => <Image key={item.id}
+                                                    style={{width:item.webformatWidth/2, height:item.webformatHeight/2}}
+                                                    //style={{flex:1, alignSelf: 'stretch'}}
+                                                    source={{uri:item.webformatURL}
+                                                } />
+                        }
+                    />
 
                     <Button onPress={() => {this.setState({resultObjects: []}) }} title="   Back   "/>
+                    <Text></Text>
                 </View>
             );
         }//end else
@@ -131,8 +133,12 @@ const styles = StyleSheet.create({
       width: '100%',
       height: '80%',
       flexDirection: 'column', //sets primary row
-      justifyContent: "center", //sets spacing of primary row
+      justifyContent: 'center', //sets spacing of primary row
       alignItems: 'center', //sets spacing of secondary row
+    },
+    imageContainer: {
+        flexDirection: 'column',
+        justifyContent: 'center',       
     },
     h1: {
       fontSize: 32,
@@ -146,4 +152,5 @@ const styles = StyleSheet.create({
       fontSize: 16,
       textAlign: "center",
     },
+
 });

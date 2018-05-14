@@ -16,29 +16,29 @@ export default class App extends React.Component {
 
 	render() {
     	return (
-      		<View style={styles.appContainer}>
+			<View style={styles.appContainer}>
 
-        		<Header />
+				<Header />
 				<SearchView />
-    	    	<Footer />
+				<Footer />
 
-      		</View>
+			</View>
     	);
 	}//end render
 	  
 }// end class app
 
 const styles = StyleSheet.create({
-  	appContainer: {
-    	flex: 1,
-    	backgroundColor: '#fff',
-    	alignItems: 'center',
-  	},
-  	bodyElement: {
+	appContainer: {
+		flex: 1,
+		backgroundColor: '#fff',
+		alignItems: 'center',
+	},
+	bodyElement: {
 		width: '100%',
-    	height: '80%',
-    	flexDirection: 'column', //sets primary row
-    	justifyContent: "center", //sets spacing of primary row
-    	alignItems: 'center', //sets spacing of secondary row
-  	},
+		height: '80%',
+		flexDirection: 'column', //sets primary row
+		justifyContent: "center", //sets spacing of primary row
+		alignItems: 'center', //sets spacing of secondary row
+	},
 });
